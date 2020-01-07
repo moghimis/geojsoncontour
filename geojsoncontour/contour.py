@@ -10,7 +10,7 @@ from .utilities.multipoly import MP, keep_high_angle, set_contourf_properties
 
 def contour_to_geojson(contour, geojson_filepath=None, min_angle_deg=None,
                        ndigits=5, unit='', stroke_width=1, geojson_properties=None, strdump=False,
-                       serialize=True):
+                       serialize=True, simplify=True):
     """Transform matplotlib.contour to geojson."""
     collections = contour.collections
     contour_index = 0
@@ -18,6 +18,9 @@ def contour_to_geojson(contour, geojson_filepath=None, min_angle_deg=None,
     for collection in collections:
         color = collection.get_edgecolor()
         for path in collection.get_paths():
+            if not simplify:    
+                path.should_simplify = False
+        
             v = path.vertices
             if len(v) < 3:
                 continue
@@ -41,13 +44,15 @@ def contour_to_geojson(contour, geojson_filepath=None, min_angle_deg=None,
 
 def contourf_to_geojson_overlap(contourf, geojson_filepath=None, min_angle_deg=None,
                                 ndigits=5, unit='', stroke_width=1, fill_opacity=.9,
-                                geojson_properties=None, strdump=False, serialize=True):
+                                geojson_properties=None, strdump=False, serialize=True, simplify=True):
     """Transform matplotlib.contourf to geojson with overlapping filled contours."""
     polygon_features = []
     contourf_idx = 0
     for collection in contourf.collections:
         color = collection.get_facecolor()
         for path in collection.get_paths():
+            if not simplify:    
+                path.should_simplify = False
             for coord in path.to_polygons():
                 if min_angle_deg:
                     coord = keep_high_angle(coord, min_angle_deg)
